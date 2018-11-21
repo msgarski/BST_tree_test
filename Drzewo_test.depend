@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1542834997 source:d:\uniwersytet 3-go wieku\testowanie\drzewo_test\main.cpp
+	<iostream>
+	<cstdlib>
+	<cstring>
+	<string>
+
