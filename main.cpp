@@ -212,54 +212,67 @@ Node *p=*root;        //wskaznik wedrujacy p
             p=p->left;
     }
     //znalazl p, a jego rodzic to parent_p
+    //if(p->klucz==x)
+       // cout<<"Sukces:"<<endl;
+       //cout<<"rodzic p = "<<parent_p->klucz<<endl;
+    cout<<"klucz p = "<<p->klucz<<endl;
 
     if (!p)     //jednak nie znalazl  p, wychodzimy z funkcji
     {
-        cout<<"Nie udalo sie znalezc klucza o szukanym kluczu"<<endl<<endl;
+        cout<<"Nie udalo sie znalezc wezla o szukanym kluczu = "<<x<<endl<<endl;
         return;
     }
+//dotad ok******************************************************************************************
 // I przypadek znalezienia p:
     //  czy p jest lisciem??, czyli czy ma potomstwo?
     if(p->left==nullptr&&p->right==nullptr)
     {//tak, jest lisciem!!
-        if(p==*root) //a moze tez jest przy okazji rootem?
+        cout<<" Jest lisciem"<<endl;
+        if(p==*root) //a moze tez jest przy okazji rootem?      TEGO NIE SPRAWDZILEM!!
         {
             root==nullptr;
             delete p;   //zwalniamy pamiec po p
             return;
         }
         else if(parent_p->right==p)//nie jest rootem, wiec:
-            parent_p->right==nullptr;
+            parent_p->right=nullptr;
         else
-            parent_p->left==nullptr;
+        {
+                        parent_p->left=nullptr;
+                        cout<<" parent p = "<<parent_p->klucz<<endl;
+
+        }
         delete p;
         return;
     }
+//dotad ok************************************************************************************************
 
 // II przypadek:
-    // p nie jest lisciem, ani lisciem-wezlem
+    // p nie jest lisciem, ani lisciem-rootem
     //moze byc gdzies w srodku drzewa i...
 
     //ma tylko lewe poddrzewo:
     if(!p->right)
     {
-        if(p==*root)
+        if(p==*root)            //TEGO NIE SPRAWDZILEM
         {
             *root=p->left;
             delete p;
         }
-        else if(parent_p->right=p)
+        //cout<<"parent p right ma klucz: "<<parent_p->right->klucz<<endl;
+        else if(parent_p->right==p)
             parent_p->right=p->left;
         else
-            parent_p->left-p->left;
+            parent_p->left=p->left;
         delete p;
         return;
     }
+//dotad ok**************************************************************************************
 
     //lub ma tylko prawe poddrzeewo:
     if(!p->left)
     {
-        if(p==*root)
+        if(p==*root)        //TEGO NIE SPRAWDZILEM
         {
             *root=p->right;
             delete p;
@@ -271,7 +284,7 @@ Node *p=*root;        //wskaznik wedrujacy p
         delete p;
         return;
     }
-
+//dotad ok************************************************************************************************
     //skoro tutaj jestesmy, to znaczy, ze
     //p ma oba poddrzewa, wiec nie bedzie latwo...
 
@@ -284,31 +297,55 @@ Node *p=*root;        //wskaznik wedrujacy p
         rodzic_poprzednika=poprzednik;
         poprzednik=poprzednik->right;
     }
+    cout<<" poprzednik wezla "<<x<<" to wezel "<<poprzednik->klucz<<endl;
+    //cout<<"a p to : "<<p->klucz<<" a jego rodzic to: "<<parent_p->klucz<<endl;
+    cout<<"a root to "<<(*root)->klucz<<endl;
     //mamy poprzednika, teraz go obejrzymy i wytniemy...
-    if(poprzednik=p->left) //gdy poprzednik jest tuz obok p, po lewej stronie,
+    //dotad ok**************************************************************************************************
+    if(poprzednik==p->left) //gdy poprzednik jest tuz obok p, po lewej stronie,
     {
-        if(p=*root) //a p jest rootem
+        if(p==*root) //a p jest rootem           TEGO NIE SPRAWDZILEM
         {
             *root=p->left;
             (*root)->right=p->right;
             delete p;
             return;
         }
-        else    //poprzednik obok, a p nie jest rootem
+        else    //poprzednik tuz obok, a p nie jest rootem
         {
-            if(parent_p->right=p)
+            cout<<"czy tu jest?"<<endl;
+            if(parent_p->right==p) //wysypuje sie tutaj
+            {
                 parent_p->right=poprzednik;
-            else if(parent_p->left=p)   //tu mozna zrezygnowac z tego warunku i tylko else
+                cout<<"czy tu tez jest?"<<endl;
+            }
+
+            else if(parent_p->left==p)   //tu mozna zrezygnowac z tego warunku i tylko else
                 parent_p->left=poprzednik;
+
             poprzednik->right=p->right;
             delete p;
+            return;
         }
+    }
+//dotad ok***********************************************************************************************
+
+
 
         //no i ostatni przypadek
         //gdy poprzednik jest gdzies na koncu...
         //wyluskanie poprzednika:
+        cout<<"rodzic poprzednika: "<<rodzic_poprzednika->klucz<<endl;
         rodzic_poprzednika->right=poprzednik->left;
         poprzednik->left=nullptr;
+        if(p->klucz==(*root)->klucz)
+    {
+        poprzednik->left=(*root)->left;
+        poprzednik->right=(*root)->right;
+        *root=poprzednik;
+        delete p;
+        return;
+    }
 
         //wstawienie poprzednika na miejsce p:
         if(p->klucz<parent_p->klucz)
@@ -321,7 +358,7 @@ Node *p=*root;        //wskaznik wedrujacy p
         poprzednik->left=p->left;
 
         delete p;
-    }
+    return;
 }
 
 //funkcje przelatujace przez drzewo
@@ -402,14 +439,20 @@ int main()
         wstawienie(&drzewo, 250);
 
          wstawienie(&drzewo, 400);
+                  wstawienie(&drzewo, 500);
+         wstawienie(&drzewo, 58);
+         wstawienie(&drzewo, 65);
+
+
     inorder(drzewo);
       cout<<endl;
 szukaj(drzewo, 13);
   cout<<endl;
   szukaj(drzewo, 55);
-usuwanie(&drzewo, 200);
+usuwanie(&drzewo, 100);
 inorder(drzewo);
       cout<<endl;
+preorder(drzewo);
 
 cout<<" root-klucz "<<(*drzewo).klucz<<endl;
 
