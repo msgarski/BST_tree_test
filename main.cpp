@@ -5,92 +5,70 @@
 
 using namespace std;
 
+int licznik=0;
+int k;
+bool tab[20001]{};
 struct Node
 {
     int klucz;
-    char ch[10];
+    char ch[10]{};
     Node *right;
     Node *left;
 
 };
-//********************************************************************************************
-//********************************************************************************************
-struct Stos
+//******************************************************************************************************************
+//funkcja do zaznaczania w tablicy istniejacych wezlow
+    void inorder_stan(Node *root, bool *a)
 {
-    Node *prarodzic=nullptr;
-    Stos *next=nullptr;
-};
-Stos *top=nullptr; //tutaj, czy wew funkcji szukania?
-
-//funkcje do obslugi stosu:
-
-//funkcja wstawiajaca na stos:
-void push(Node *root)
-{
-    Stos *topStos=new Stos;
-    topStos->prarodzic=root;
-    topStos->next=top;
-    top=topStos;
-}
-//funkcja zdejmujaca ze stosu:
-Node* pop(void)
-{
-    Node *p;
-    Stos *temp;
-    if(top!=NULL)
-    {
-    temp=top;
-    p=top->prarodzic;
-    top=top->next;
-    printf("Wartosc zdjeta ze stosu to:\n%d", p);
-    }
-    else
-    {
-     cout<<"Stos jest pusty..."<<endl;
-    }
-    delete temp;
-    return p;
-}
-//ta funkcja nie jest potrzebna :
-//funkcja podaje co jest na szczycie stosu:
-void peek(void)
-{
-    if(top!=NULL)
-        cout<<"Oto szczyt stosu: "<<(*top).prarodzic;
-    else
-        cout<<"stos jest pusty..."<<endl<<endl;
-}
-//*****************************************************************************************************
-//*****************************************************************************************************
-/*
-void stan_aktualny(Node *root, int t)
-{
-    int i;
-    if(root)
-    {
-        stan_aktualny(root->left, t);
+         if(root)
         {
-            {
-                if(root->klucz>=-10000&&root->klucz<=10000)
-                {
-                    i=root->klucz+10000;
-                    t[i]=1;
-                }
-            }
+            inorder_stan(root->left, a);        //rekurencyjnie w porzadku poprzecznym przechodzi drzewo
+            cout<<root->klucz<<" ";             //i wracajac zaznacza w przekazanej tablicy wystapienia
+            a[root->klucz+10000]=true;                //kluczy w odwiedzonych wezlach
+            inorder_stan(root->right, a);
         }
-        stan_aktualny(root->right, t);
-    }
+
+    return;
 }
-
-*/
-
-/*
-Node * inicjalizacja(Node **root)
+//**********************************************************************************************************************
+//funkcja do zamiany liczby int na tablice char
+void int_to_char(int liczba, char *table_char)  //pobiera adres tablicy z wezla i wypelnia ja
 {
+    //char*table_char=new char[11]{};
+    char znak;                                  //tu zapiszemy znak liczby: - lub +
+    int i=9;                                    //juz nie pamietam, dlaczego tu jest 9 a nie 10
+    (liczba<0)?znak='-': znak='+';              //zapisanie znaku liczby do zmiennej char
+    (liczba<0)?liczba=-liczba: liczba;          //w funkcji lepiej pracowac na bezznakowych wartosciach
+    //cout<<"liczba po abs "<<liczba<<endl;
+    while(liczba)                               //petla dopoki mamy jeszcze co rozkladac na czynniki
+    {
+        switch(liczba%10)                       //odcinamy koncowki liczby i przypisujemy im char
+        {
+            case 0: table_char[i]='0'; break;
+            case 1: table_char[i]='1'; break;
+            case 2: table_char[i]='2'; break;
+            case 3: table_char[i]='3'; break;
+            case 4: table_char[i]='4'; break;
+            case 5: table_char[i]='5'; break;
+            case 6: table_char[i]='6'; break;
+            case 7: table_char[i]='7'; break;
+            case 8: table_char[i]='8'; break;
+            case 9: table_char[i]='9'; break;
+        }
+        liczba/=10;
+        i--;
+    }
+    //for(int k=0; k<10; k++)
+        //cout<<table_char[k]<<" ";
+    table_char[i]=znak;
+    //cout<<"funkcja dziala"<<endl;
+    //for(int k=0; k<10; k++)
+        //cout<<table_char[k]<<" ";
+        //cout<<"wychodzimy z funkcji"<<endl;
+    return; //table_char;
 }
-*/
 
-
+//********************************************************************************************************
 void wstawienie(Node **root, int klucz)//gotowa do sprawdzenia oprócz tablicy
 {
 //alokacja pamieci na nowy wezel listy
@@ -100,13 +78,14 @@ void wstawienie(Node **root, int klucz)//gotowa do sprawdzenia oprócz tablicy
             cout<<"Nie udalo sie utworzyc nowego wezla drzewa!\n Brak pamieci!"<<std::endl;
             return;
         }
-        //cout<<"alokacja udana "<<endl;//linia do wykasowannia
+
 //inicjalizacja liczbowych zmiennych wezla:
         nowy->klucz=klucz;
         //potrzeba jeszcze wypelnic tablice....
+        int_to_char(klucz, nowy->ch);
         nowy->right=nullptr;
         nowy->left=nullptr;
-        //cout<<"nadanie wartosci udane "<<endl;//linia dowykasowania
+
 //zaczynamy szukac miejsca na nowy wezel
         Node *p=*root;
         Node *rodzic=nullptr;
@@ -120,6 +99,8 @@ void wstawienie(Node **root, int klucz)//gotowa do sprawdzenia oprócz tablicy
             if(p->klucz==klucz) //powtorzenie wstawianego klucza
             {
                 cout<<"BLAD! W drzewie jest juz wezel o kluczu = "<<klucz<<endl<<endl;
+                p=nullptr;
+                delete nowy;
                 return;
             }
             rodzic=p;
@@ -135,35 +116,37 @@ void wstawienie(Node **root, int klucz)//gotowa do sprawdzenia oprócz tablicy
         return;
 }
 
-
+//***********************************************************************************************************
 void wstawienie_X_elementow(Node **root, int X)
 {
     int los;
-    int tabl_losowych[20001];
-
+    bool tabl_losowych[20001];
 
     //przejscie przez drzewo aby zaktualizowac tablice wystepujacych juz w drzewie kluczzy
-
-
+    inorder_stan(*root, tabl_losowych);
+    /*
+for(int i=0; i<200; i++)
+{
+    cout<<tabl_losowych[i]<<"  "<<i<<" ";
+}
+*/
         for(int i=0; i<X; i++)
         {
             //losowanie unikalnej liczby i przes³anie jej do wezla listy
             do
-                {
-                    los=(rand()%21001);
-                }
-                while(tabl_losowych[los]);
-                tabl_losowych[los]=1;        //zapamietanie wylosowania danej liczb
+            {
+                los=(rand()%21001);
+            }
+            while(tabl_losowych[los]);
+            tabl_losowych[los]=true;        //zapamietanie wylosowania danej liczb
             //wywolanie funkcji wstawiajacej dla wylosowanego klucza
-            wstawienie(root, los);
+            wstawienie(root, los-10000);
         }
         return;
 }
-
+//****************************************************************************************************************
 void szukaj(Node *root, int szukany)
 {
-    //Stos *pop=nullptr;
-
     int sukces=0;
     if(!root)
     {
@@ -171,39 +154,48 @@ void szukaj(Node *root, int szukany)
         return;
     }
     Node *p=root;
-    push(root);
     while(p!=nullptr)
     {
         if(p->klucz==szukany)
         {
             cout<<"Znaleziono szukany klucz "<<szukany<<endl;
+            cout<<"Oto zawartosc jego tablicy: ";
+
+            for(int i=0; i<10; i++)
+            {
+                if(p->ch[i])
+                cout<<p->ch[i]<<" ";
+            }
             sukces=1;
             break;
         }
         else
         {
-            //push(p)
-
             if(p->klucz<szukany)
                 p=p->right;
-            else //if(p->klucz>szukany)
+            else
                 p=p->left;
-            //pop(p)
         }
     }
-    if(!sukces)
+    if(!sukces)     //to chyba niepotrzebne
         cout<<"Nie znaleziono wezla o kluczu = "<<szukany<<endl<<endl;
 
     return;
 }
 
-
+//********************************************************************************************************************
 void usuwanie(Node **root, int x)
 {
 Node *parent_p=nullptr; //to rodzic p, ktory sie przyda, gdy trzeba bedzie podpiac poprzednika w miejsce p
 Node *p=*root;        //wskaznik wedrujacy p
+cout<<"Rozpoczynam usuwanie wezla o kluczu: "<<x<<endl;
+if(!*root)
+{
+    cout<<"Drzewo nie zawiera zadnych wezlow!"<<endl;
+    return;
+}
 //szukanie p i jednoczesne podciaganie za soba rodzica_p:
-    while(p!=nullptr&&x!=p->klucz) //rob to, co w petli, az bedzie sukces lub sciana
+    while(p!=nullptr&&x!=p->klucz)      //rob to, co w petli, az bedzie sukces lub sciana
     {
         parent_p=p;
         if(p->klucz<x)
@@ -211,36 +203,34 @@ Node *p=*root;        //wskaznik wedrujacy p
         else
             p=p->left;
     }
-    //znalazl p, a jego rodzic to parent_p
-    //if(p->klucz==x)
-       // cout<<"Sukces:"<<endl;
-       //cout<<"rodzic p = "<<parent_p->klucz<<endl;
-    cout<<"klucz p = "<<p->klucz<<endl;
-
+    //zakonczyl szukanie, ale czy znalazl???:
     if (!p)     //jednak nie znalazl  p, wychodzimy z funkcji
     {
-        cout<<"Nie udalo sie znalezc wezla o szukanym kluczu = "<<x<<endl<<endl;
+        cout<<"Nie udalo sie znalezc wezla o tym kluczu"<<endl<<"Nie zostal wiec usuniety..."<<endl<<endl;
         return;
     }
+    //jadnak znalazl p, a jego rodzic to parent_p
+
 //dotad ok******************************************************************************************
 // I przypadek znalezienia p:
     //  czy p jest lisciem??, czyli czy ma potomstwo?
     if(p->left==nullptr&&p->right==nullptr)
-    {//tak, jest lisciem!!
-        cout<<" Jest lisciem"<<endl;
-        if(p==*root) //a moze tez jest przy okazji rootem?      TEGO NIE SPRAWDZILEM!!
+    {                               //tak, jest lisciem!!
+        cout<<"Usuwany wezel jest lisciem(bezpotomny)"<<endl;
+        if(p==*root)                //a moze tez jest przy okazji rootem?
         {
-            root==nullptr;
-            delete p;   //zwalniamy pamiec po p
+            cout<<"a przy okazji to root"<<endl;
+            *root=nullptr;          //zerujemy roota
+            delete p;               //zwalniamy pamiec po p
+            cout<<"Usuniety..."<<endl<<endl;
             return;
         }
-        else if(parent_p->right==p)//nie jest rootem, wiec:
+        else if(parent_p->right==p) //nie jest rootem, wiec:
             parent_p->right=nullptr;
         else
         {
-                        parent_p->left=nullptr;
-                        cout<<" parent p = "<<parent_p->klucz<<endl;
-
+            parent_p->left=nullptr;
+            cout<<" parent p = "<<parent_p->klucz<<endl;
         }
         delete p;
         return;
@@ -259,7 +249,6 @@ Node *p=*root;        //wskaznik wedrujacy p
             *root=p->left;
             delete p;
         }
-        //cout<<"parent p right ma klucz: "<<parent_p->right->klucz<<endl;
         else if(parent_p->right==p)
             parent_p->right=p->left;
         else
@@ -319,7 +308,6 @@ Node *p=*root;        //wskaznik wedrujacy p
                 parent_p->right=poprzednik;
                 cout<<"czy tu tez jest?"<<endl;
             }
-
             else if(parent_p->left==p)   //tu mozna zrezygnowac z tego warunku i tylko else
                 parent_p->left=poprzednik;
 
@@ -329,9 +317,6 @@ Node *p=*root;        //wskaznik wedrujacy p
         }
     }
 //dotad ok***********************************************************************************************
-
-
-
         //no i ostatni przypadek
         //gdy poprzednik jest gdzies na koncu...
         //wyluskanie poprzednika:
@@ -346,7 +331,6 @@ Node *p=*root;        //wskaznik wedrujacy p
         delete p;
         return;
     }
-
         //wstawienie poprzednika na miejsce p:
         if(p->klucz<parent_p->klucz)
             parent_p->left=poprzednik;
@@ -356,7 +340,6 @@ Node *p=*root;        //wskaznik wedrujacy p
         //laczenenie poprzednika z innymi wezlami
         poprzednik->right=p->right;
         poprzednik->left=p->left;
-
         delete p;
     return;
 }
@@ -373,16 +356,30 @@ void preorder(Node *root)
     return;
 }
 
+//zwykla funkcja inorder
 void inorder(Node *root)
 {
-    if(root)
-    {
-        inorder(root->left);
-        cout<<root->klucz<<" ";
-        inorder(root->right);
-    }
+         if(root)
+        {
+            inorder(root->left);
+            cout<<root->klucz<<" ";
+            licznik++;
+            inorder(root->right);
+        }
+
     return;
 }
+
+//funkcja inorder do zliczania odwiedzonych wezlow
+void inorder_licz(Node *root)
+{
+    licznik=0;
+    inorder(root);
+    cout<<endl<<"licznik inorder = "<<licznik<<endl;
+    if(!licznik)
+        cout<<"Drzewo nie zawiera zadnych elementow!"<<endl<<endl;
+}
+
 
 void postorder(Node *root)
 {
@@ -400,20 +397,65 @@ void postorder(Node *root)
 
 int main()
 {
-    //Stos *top=nullptr;
 
     Node *drzewo=nullptr;
+//sprawdzenie malego drzewa
 
+//szukaj(drzewo, 30);
+
+
+usuwanie(&drzewo, 30);
+
+
+wstawienie(&drzewo, -9999);
+wstawienie(&drzewo, 30);
+wstawienie(&drzewo, 10);
+//wstawienie(&drzewo, 40);
+
+
+
+
+inorder_licz(drzewo);
+usuwanie(&drzewo, 50);
+
+cout<<"co zostalo:"<<endl;
+inorder_licz(drzewo);
+
+
+szukaj(drzewo, -9999);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
     wstawienie(&drzewo, 100);
-    inorder(drzewo);
+    inorder_licz(drzewo);
      cout<<endl;
     wstawienie(&drzewo, 50);
     inorder(drzewo);
+
+    wstawienie(&drzewo, 50);
+    wstawienie(&drzewo, 50);
      cout<<endl;
     wstawienie(&drzewo, 200);
-    inorder(drzewo);
+    inorder_licz(drzewo);
      cout<<endl;
-    wstawienie(&drzewo, 100);
+    //wstawienie(&drzewo, 100);
 
      cout<<endl;
  wstawienie(&drzewo, 25);
@@ -441,20 +483,12 @@ int main()
          wstawienie(&drzewo, 400);
                   wstawienie(&drzewo, 500);
          wstawienie(&drzewo, 58);
-         wstawienie(&drzewo, 65);
+                  wstawienie(&drzewo, 58);
+
+    szukaj(drzewo, 300);
+*/
 
 
-    inorder(drzewo);
-      cout<<endl;
-szukaj(drzewo, 13);
-  cout<<endl;
-  szukaj(drzewo, 55);
-usuwanie(&drzewo, 100);
-inorder(drzewo);
-      cout<<endl;
-preorder(drzewo);
-
-cout<<" root-klucz "<<(*drzewo).klucz<<endl;
 
 
     return 0;
