@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <ctime>
 
 using namespace std;
 
@@ -23,8 +24,8 @@ struct Node
          if(root)
         {
             inorder_stan(root->left, a);        //rekurencyjnie w porzadku poprzecznym przechodzi drzewo
-            cout<<root->klucz<<" ";             //i wracajac zaznacza w przekazanej tablicy wystapienia
-            a[root->klucz+10000]=true;                //kluczy w odwiedzonych wezlach
+                                                //i wracajac zaznacza w przekazanej tablicy wystapienia
+            a[root->klucz+10000]=true;          //kluczy w odwiedzonych wezlach
             inorder_stan(root->right, a);
         }
 
@@ -71,6 +72,26 @@ void int_to_char(int liczba, char *table_char)  //pobiera adres tablicy z wezla 
 //********************************************************************************************************
 void wstawienie(Node **root, int klucz)//gotowa do sprawdzenia oprócz tablicy
 {
+//zaczynamy szukac miejsca na nowy wezel
+        Node *p=*root;
+        Node *rodzic=nullptr;
+        if(*root)
+        {
+            while(p!=nullptr)
+            {
+                if(p->klucz==klucz) //powtorzenie wstawianego klucza
+                {
+                    cout<<"BLAD! W drzewie jest juz wezel o kluczu = "<<klucz<<endl<<endl;
+                    p=nullptr;
+                    return;
+                }
+                rodzic=p;
+                if(p->klucz>klucz)
+                    p=p->left;
+                else
+                    p=p->right;
+            }
+        }
 //alokacja pamieci na nowy wezel listy
         Node *nowy= new Node;
         if(!nowy)
@@ -85,34 +106,16 @@ void wstawienie(Node **root, int klucz)//gotowa do sprawdzenia oprócz tablicy
         int_to_char(klucz, nowy->ch);
         nowy->right=nullptr;
         nowy->left=nullptr;
-
-//zaczynamy szukac miejsca na nowy wezel
-        Node *p=*root;
-        Node *rodzic=nullptr;
         if(!*root)
         {
             *root=nowy;
             return;
         }
-        while(p!=nullptr)
-        {
-            if(p->klucz==klucz) //powtorzenie wstawianego klucza
-            {
-                cout<<"BLAD! W drzewie jest juz wezel o kluczu = "<<klucz<<endl<<endl;
-                p=nullptr;
-                delete nowy;
-                return;
-            }
-            rodzic=p;
-            if(p->klucz>klucz)
-                p=p->left;
-            else
-                p=p->right;
-        }
-        if(rodzic->klucz>klucz)
+        else if(rodzic->klucz>klucz)
             rodzic->left=nowy;
         else
             rodzic->right=nowy;
+
         return;
 }
 
@@ -121,24 +124,21 @@ void wstawienie_X_elementow(Node **root, int X)
 {
     int los;
     bool tabl_losowych[20001];
+    srand(time(0));
 
     //przejscie przez drzewo aby zaktualizowac tablice wystepujacych juz w drzewie kluczzy
     inorder_stan(*root, tabl_losowych);
-    /*
-for(int i=0; i<200; i++)
-{
-    cout<<tabl_losowych[i]<<"  "<<i<<" ";
-}
-*/
+
         for(int i=0; i<X; i++)
         {
             //losowanie unikalnej liczby i przes³anie jej do wezla listy
             do
             {
-                los=(rand()%21001);
+                los=(rand()%20001);
             }
             while(tabl_losowych[los]);
             tabl_losowych[los]=true;        //zapamietanie wylosowania danej liczb
+
             //wywolanie funkcji wstawiajacej dla wylosowanego klucza
             wstawienie(root, los-10000);
         }
@@ -293,7 +293,7 @@ if(!*root)
     //dotad ok**************************************************************************************************
     if(poprzednik==p->left) //gdy poprzednik jest tuz obok p, po lewej stronie,
     {
-        if(p==*root) //a p jest rootem           TEGO NIE SPRAWDZILEM
+        if(p==*root) //a p jest rootem
         {
             *root=p->left;
             (*root)->right=p->right;
@@ -355,14 +355,27 @@ void preorder(Node *root)
     }
     return;
 }
-
+void preorder_licz(Node *root)
+{
+    licznik=0;
+    preorder(root);
+    cout<<endl<<"licznik preorder = "<<licznik<<endl;
+    if(!licznik)
+        cout<<"Drzewo nie zawiera zadnych elementow!"<<endl<<endl;
+}
 //zwykla funkcja inorder
 void inorder(Node *root)
 {
          if(root)
         {
             inorder(root->left);
-            cout<<root->klucz<<" ";
+            cout<<root->klucz<<" "<<"zawartosc jego tablicy: ";
+            for(int i=0; i<10; i++)
+            {
+                if(root->ch[i])
+                cout<<root->ch[i]<<" ";
+            }
+            cout<<endl;
             licznik++;
             inorder(root->right);
         }
@@ -391,14 +404,28 @@ void postorder(Node *root)
     }
     return;
 }
+void postorder_licz(Node *root)
+{
+    licznik=0;
+    postorder(root);
+    cout<<endl<<"licznik inorder = "<<licznik<<endl;
+    if(!licznik)
+        cout<<"Drzewo nie zawiera zadnych elementow!"<<endl<<endl;
+}
+void inicjacja()        //czy to potrzebna?
+{
+    Node *drzewo=nullptr;
+}
+
 
 
 
 
 int main()
 {
-
-    Node *drzewo=nullptr;
+srand(time(0));
+//inicjacja();
+Node *drzewo=nullptr;
 //sprawdzenie malego drzewa
 
 //szukaj(drzewo, 30);
@@ -419,28 +446,16 @@ inorder_licz(drzewo);
 usuwanie(&drzewo, 50);
 
 cout<<"co zostalo:"<<endl;
-inorder_licz(drzewo);
+//inorder_licz(drzewo);
 
 
 szukaj(drzewo, -9999);
+cout<<endl;
+cout<<"tu ok"<<endl;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+wstawienie_X_elementow(&drzewo, 100);
+cout<<endl;
+inorder_licz(drzewo);
 
     /*
     wstawienie(&drzewo, 100);
